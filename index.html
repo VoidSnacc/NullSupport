@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support Form</title>
+<style>
+    /* Reset and background */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e1e1e, #2e2e2e), 
+                    url('https://via.placeholder.com/1920x1080') no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    /* Form container */
+    .form-container {
+        background-color: rgba(0, 0, 0, 0.85);
+        padding: 25px;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 420px;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0px 10px 30px rgba(0,0,0,0.6);
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+    }
+    .error {
+        animation: shake 0.4s;
+        border-color: red !important;
+    }
+
+    /* Titles */
+    .form-container h1 {
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 24px;
+        letter-spacing: 1px;
+    }
+    label {
+        font-size: 14px;
+        display: block;
+        margin-bottom: 6px;
+        font-weight: normal;
+    }
+
+    /* Inputs & Dropdown */
+    select, input, textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 2px solid gray;
+        background-color: #2b2b2b;
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s ease-in-out;
+    }
+    select:focus, input:focus, textarea:focus {
+        border-color: #00ff88;
+        box-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+    }
+    textarea {
+        height: 100px;
+        resize: none;
+    }
+
+    /* Button */
+    button {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #00cc66, #00994d);
+        color: white;
+        font-size: 16px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.2s ease-in-out;
+        margin-top: 10px;
+    }
+    button:hover {
+        background: linear-gradient(135deg, #00e673, #00b35a);
+        transform: scale(1.02);
+    }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+    <h1>Support Form</h1>
+    
+    <div class="form-group">
+        <label>Support Subject:</label>
+        <select id="subject">
+            <option value="Bugs">Bugs</option>
+            <option value="Payment">Payment</option>
+            <option value="Report Player">Report Player</option>
+            <option value="Ban Appeal">Ban Appeal</option>
+            <option value="Other">Other</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Discord Name:</label>
+        <input type="text" id="discord" placeholder="Your Discord name">
+    </div>
+
+    <div class="form-group">
+        <label>Minecraft Username:</label>
+        <input type="text" id="minecraft" placeholder="Your Minecraft username">
+    </div>
+
+    <div class="form-group">
+        <label>Explain your issue:</label>
+        <textarea id="issue" placeholder="Describe your problem..."></textarea>
+    </div>
+
+    <button onclick="sendForm()">Submit</button>
+</div>
+
+<script>
+async function sendForm() {
+    const webhookURL = "https://discord.com/api/v10/webhooks/1403524169869692949/l-YysuvZRL4rw5XTVjgf64bC4W4XUtw3J6WavH1svAHuF3GgLcEXwzttZRXQrYxj8PYs"; // Replace with your webhook URL
+    const subject = document.getElementById("subject");
+    const discord = document.getElementById("discord");
+    const minecraft = document.getElementById("minecraft");
+    const issue = document.getElementById("issue");
+
+    // Validation
+    let valid = true;
+    [subject, discord, minecraft, issue].forEach(el => {
+        el.classList.remove("error");
+        if (!el.value.trim()) {
+            el.classList.add("error");
+            valid = false;
+        }
+    });
+    if (!valid) return;
+
+    const time = new Date().toLocaleString();
+    const ipData = await fetch('https://api.ipify.org?format=json').then(res => res.json());
+
+    const payload = {
+        embeds: [{
+            title: subject.value,
+            description: `**Discord:** ${discord.value}\n**Minecraft:** ${minecraft.value}`,
+            color: 5763719,
+            fields: [
+                { name: "Problem", value: issue.value || "No details provided" },
+                { name: "Time", value: time },
+                { name: "IP", value: ipData.ip }
+            ]
+        }]
+    };
+
+    fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).then(res => {
+        if (res.ok) {
+            alert("Form sent successfully!");
+            [discord, minecraft, issue].forEach(el => el.value = "");
+        } else {
+            alert("Error sending form.");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
